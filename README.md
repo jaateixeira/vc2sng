@@ -36,12 +36,23 @@ This Python script was developed to compare two social network graphs, which are
 
 - Weighted graphs: Weighted graphs are graphs in which the edges between nodes have weights associated with them. NetworkX supports weighted graphs by allowing the edges to have a weight attribute.
 
-- Bipartite graphs: Bipartite graphs are graphs in which the nodes can be divided into two disjoint sets, such that every edge connects a node in one set to a node in the other set. When loading those graphs, the NetworkX bipartite module is uded for modelling them. 
+- Bipartite graphs: Bipartite graphs are graphs in which the nodes can be divided into two disjoint sets, such that every edge connects a node in one set to a node in the other set. When loading those graphs, the NetworkX bipartite module is uded for modelling them.
 
-**vc2sng** was initially designed to compare social networks of software developers modelled as two-mode networks mined from Git Repositories with ScrapLogGit2Net (see [https://github.com/jaateixeira/ScrapLogGit2Net](https://github.com/jaateixeira/ScrapLogGit2Net)).  ScrapLogGit2Net accepts _git logs_  as input and provides _GraphML_ files as output. The output of ScrapLogGit2Net captures who works with who (i.e., who co-edits source-code files with who) in a Git repository. Its outputs as _GraphML_ files are ready to use with **vc2sng**. 
+**vc2sng** should work with networks of organizations, networks of individuals and networks of things. But one level at the time. 
+
+**vc2sng** was initially designed to compare social networks of software developers modelled as two-mode networks mined from Git Repositories with ScrapLogGit2Net (see [https://github.com/jaateixeira/ScrapLogGit2Net](https://github.com/jaateixeira/ScrapLogGit2Net)).  ScrapLogGit2Net accepts _git logs_  as input and provides _GraphML_ files as output. The output of ScrapLogGit2Net captures who works with who (i.e., who co-edits source-code files with who) in a Git repository. Its outputs as _GraphML_ files are ready to use with **vc2sng**.  
 
 ## Outputs
-A description of the expected results or outputs of the project.
+
+**vc2sng** outputs 4 plots/visualizations and produces one quantitative report. 
+
+1) The original imported Graph 
+2) Comparison Graph. All new/added nodes and edges appear with a yellow colour marking and all the deleted/removed nodes appear with red marking. All with adjustable transparency. 
+3) Deleted Nodes/Edges Graph: Contains all nodes and edges that were present in the first graph but were deleted (i.e., do not appear in the second graph).
+4) Added Nodes/Edges Graph: Contains all nodes and edges that were not in the first graph but were added to the second graph.
+5) Statistics on the two social network graphs and log information.
+
+
 
 ##  How does it work 
 
