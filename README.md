@@ -85,10 +85,18 @@ git clone https://github.com/jaateixeira/vc2sng/
 cd vc2sng/
 ```
 
-## Usage
+### Usage 
+
 This Python script is designed to compare two NetworkX graphs, which are loaded from GraphML files. The comparison focuses on both structural differences (nodes and edges) and attribute differences between the graphs. The script provides visualizations, stastistical reports and logs results.
 
-### Usage Example
+Once the dependencies are installed, you can run the script as follows: 
+
+```bash
+python vc2sng.py <graph1.graphml> <graph2.graphml>
+```
+
+
+#### Usage Example
 python vc2sng.py network1.graphml network2.graphml
 
 This will compare the two provided GraphML files and output the differences, including visualizations of added and deleted nodes and edges. Statistics and execution logs will be also provided on stdout. 
