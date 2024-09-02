@@ -14,7 +14,7 @@ Given two social network graphs (passed as arguments in the GraphML format) visu
 - [License](#license)
 
 ## Problem Statement
-It is hard to compare two social networks.  Using rich visualization techniques can help with the problem.  
+It is hard to compare two social networks.  Using rich visualization techniques at side of know statistical reports can help with the problem.  
 
 ## Vision
 A world where: 
