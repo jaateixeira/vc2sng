@@ -18,8 +18,8 @@ It is hard to compare two social networks.  Using rich visualization techniques 
 
 ## Vision
 A world where: 
-1. Comparing the social structure of distinct groups is easier
-2. Comparing the social structure of a cohesive group at two points is easier 
+1. Comparing the social structure of distinct groups is easy. 
+2. Comparing the social structure of a cohesive group at two points in time is easy. 
 
 ## Inputs
 A description of the data, resources, or inputs required for the project.
@@ -33,7 +33,8 @@ A description of the expected results or outputs of the project.
 Instructions on how to install your project.
 
 ## Usage
-Instructions on how to use your project.
+This Python script is designed to compare two NetworkX graphs, which are loaded from GraphML files. The comparison focuses on both structural differences (nodes and edges) and attribute differences between the graphs. The script provides visualizations, stastistical reports and logs results.
+
 
 ## Related work 
 - Minjeong Shin, Dongwoo Kim, Jae Hee Lee, Umanga Bista, and Lexing Xie. "Visualizing Graph Differences from Social Media Streams." In *Proceedings of the Twelfth ACM International Conference on Web Search and Data Mining (WSDM '19)*, 806–809. Association for Computing Machinery, New York, NY, USA. 2019. [https://doi.org/10.1145/3289600.3290616](https://doi.org/10.1145/3289600.3290616)
