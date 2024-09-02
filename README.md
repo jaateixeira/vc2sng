@@ -1,7 +1,7 @@
-# vc2sng - visually compare 2 social network graphs
+# **vc2sng** - visually compare 2 social network graphs
 
 ## Description
-Given two social network graphs (passed as arguments in the GraphML format) visually and quantitatively compare them.  If you use diff to compare two text documents, then use cv2sng to compare two network graphs. 
+Given two social network graphs (passed as arguments in the GraphML format) visually and quantitatively compare them.  If you use **diff** to compare two text documents, then use **cv2sng** to compare two network graphs. 
 
 ## Table of Contents
 - [Problem Statement](#problem-statement)
@@ -25,7 +25,7 @@ A world where:
 
 This Python script was developed to compare two social network graphs, which are loaded from GraphML files. The comparison focuses on both structural differences (nodes and edges) and attribute differences between the graphs.
 
-vc2sgn  is pure Python code built on top of the NetworkX Python library for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks. It imports GraphML files using the read_graphml() function from NetworkX, therefore it vc2sgn can import and compare the following types of graphs: 
+**vc2sgn**  is pure Python code built on top of the NetworkX Python library for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks. It imports GraphML files using the read_graphml() function from NetworkX, therefore it vc2sgn can import and compare the following types of graphs: 
 
 - Undirected graphs: Undirected graphs are graphs in which the edges between nodes are not directed. Using NetworkX Graph class for undirected graphs.
 
@@ -37,7 +37,7 @@ vc2sgn  is pure Python code built on top of the NetworkX Python library for the 
 
 - Bipartite graphs: Bipartite graphs are graphs in which the nodes can be divided into two disjoint sets, such that every edge connects a node in one set to a node in the other set. When loading those graphs, the NetworkX bipartite module is uded for modelling them. 
 
-vc2sng was initially designed to compare social networks of software developers modelled as two-mode networks mined from Git Repositories with ScrapLogGit2Net (see [https://github.com/jaateixeira/ScrapLogGit2Net](https://github.com/jaateixeira/ScrapLogGit2Net)).  
+**vc2sng** was initially designed to compare social networks of software developers modelled as two-mode networks mined from Git Repositories with ScrapLogGit2Net (see [https://github.com/jaateixeira/ScrapLogGit2Net](https://github.com/jaateixeira/ScrapLogGit2Net)).  ScrapLogGit2Net accepts _git logs_  as input and provides _GraphML_ files as output. The output of ScrapLogGit2Net captures who works with who (i.e., who co-edits source-code files with who) in a Git repository. Its outputs as _GraphML_ files are ready to use with **vc2sng**. 
 
 ## Outputs
 A description of the expected results or outputs of the project.
