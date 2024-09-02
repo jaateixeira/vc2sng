@@ -1,4 +1,4 @@
-# Contributing Guide to **vc2sng**
+# Contributing guide to **vc2sng**
 
 We welcome contributions to this project! If you'd like to contribute, please follow the guidelines below.
 
