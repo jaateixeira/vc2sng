@@ -1,9 +1,7 @@
 # vc2sng - visually compare 2 social network graphs
 
-# Project Title
-
 ## Description
-A brief description of what your project does.
+Given two social network graphs (passed as arguments in the GraphML format) visually and quantitatively compare them.  If you use diff to compare two text documents, then use cv2sng to compare two network graphs. 
 
 ## Table of Contents
 - [Problem Statement](#problem-statement)
