@@ -1,7 +1,8 @@
 # **vc2sng** - visually compare 2 social network graphs
 
 ## Description
-Given two social network graphs (passed as arguments in the GraphML format) visually and quantitatively compare them.  If you use **diff** to compare two text documents, then use **cv2sng** to compare two network graphs. 
+Given two social network graphs (passed as arguments in the GraphML format),  **cv2sng** visually and quantitatively compares them. 
+If you use **diff** to compare two text documents, then use **cv2sng** to compare two network graphs. 
 
 ## Table of Contents
 - [Problem Statement](#problem-statement)
