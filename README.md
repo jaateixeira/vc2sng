@@ -56,12 +56,42 @@ This Python script was developed to compare two social network graphs, which are
 
 ##  How does it work 
 
+### Features 
+
+This repository contains a Python script called `vc2sng` for comparing two GraphML networks. The script provides visualizations and detailed comparisons of nodes, edges, and attributes between the two networks. It supports both directed and undirected graphs, as well as weighted and unweighted edges.
+
+
+- **Graph Comparison**: Compare two GraphML files and visualize the differences.
+- **Deleted Nodes/Edges**: Generate a network of nodes and edges that were present in the first graph but deleted in the second.
+- **Added Nodes/Edges**: Generate a network of nodes and edges that were added to the second graph but not present in the first.
+- **Supports Directed/Undirected Graphs**: Handles both directed and undirected graphs.
+- **Supports Weighted/Unweighted Edges**: Handles graphs with weighted or unweighted edges.
+
 ## Installation
-Instructions on how to install your project.
+
+### Prerequisites
+
+Ensure you have Python 3.7 or later installed on your system. You can download Python from the official [Python website](https://www.python.org/downloads/).
+
+#### Install dependencies 
+```bash
+pip install networkx matplotlib rich loguru
+```
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/jaateixeira/vc2sng/
+cd vc2sng/
+```
 
 ## Usage
 This Python script is designed to compare two NetworkX graphs, which are loaded from GraphML files. The comparison focuses on both structural differences (nodes and edges) and attribute differences between the graphs. The script provides visualizations, stastistical reports and logs results.
 
+### Usage Example
+python vc2sng.py network1.graphml network2.graphml
+
+This will compare the two provided GraphML files and output the differences, including visualizations of added and deleted nodes and edges. Statistics and execution logs will be also provided on stdout. 
 
 ## Related work 
 - Minjeong Shin, Dongwoo Kim, Jae Hee Lee, Umanga Bista, and Lexing Xie. "Visualizing Graph Differences from Social Media Streams." In *Proceedings of the Twelfth ACM International Conference on Web Search and Data Mining (WSDM '19)*, 806–809. Association for Computing Machinery, New York, NY, USA. 2019. [https://doi.org/10.1145/3289600.3290616](https://doi.org/10.1145/3289600.3290616)
