@@ -72,9 +72,8 @@ This Python script is designed to compare two NetworkX graphs, which are loaded 
 **Keywords:** Visualization, Prototypes, Design engineering, Maintenance engineering, Tree graphs, Stacking, Information analysis, Business communication, Cognitive science, graph drawing, graph comparison, visual, side-by-side, node equivalence matrix, merge graph, business process models
 
 
-
 ## Contributing
-If you'd like to contribute to this project, please follow the standard GitHub fork and pull request workflow.
+If you'd like to contribute to this project, please follow the standard GitHub fork and pull request workflow. See [contributing.md](contributing.md) for details. 
 
 ## License
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
