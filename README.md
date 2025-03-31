@@ -106,6 +106,7 @@ This will compare the two provided GraphML files and output the differences, inc
 - K. Andrews, M. Wohlfahrt, and G. Wurzinger. "Visual Graph Comparison." In *Proceedings of the 13th International Conference on Information Visualisation (IV 2009)*, pp. 62-67. Barcelona, Spain, 2009. [https://doi.org/10.1109/IV.2009.108](https://doi.org/10.1109/IV.2009.108)
 - Tantardini, M., Ieva, F., Tajoli, L. et al. Comparing methods for comparing networks. Nature Scientific Reports 9, 17557 (2019). [https://doi.org/10.1038/s41598-019-53708-y]( https://doi.org/10.1038/s41598-019-53708-y)
 - Teixeira, J., Robles, G. & González-Barahona, J.M. Lessons learned from applying social network analysis on an industrial Free/Libre/Open Source Software ecosystem. J Internet Serv Appl 6, 14 (2015). [https://doi.org/10.1186/s13174-015-0028-2](https://doi.org/10.1186/s13174-015-0028-2)
+- Coupette, C., & Vreeken, J. (2021, August). Graph similarity description: How are these graphs similar?. In Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery & Data Mining (pp. 185-195).
   
 **Keywords:** Visualization, Prototypes, Design engineering, Maintenance engineering, Tree graphs, Stacking, Information analysis, Business communication, Cognitive science, graph drawing, graph comparison, visual, side-by-side, node equivalence matrix, merge graph, business process models
 
