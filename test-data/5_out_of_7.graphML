@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+    
+    <!-- Key definitions for node attributes -->
+    <key id="name" for="node" attr.name="name" attr.type="string"/>
+    <key id="age" for="node" attr.name="age" attr.type="int"/>
+    <key id="profession" for="node" attr.name="profession" attr.type="string"/>
+    <key id="e-mail" for="node" attr.name="e-mail" attr.type="string"/>
+    <key id="affiliation" for="node" attr.name="affiliation" attr.type="string"/>
+    <key id="connection_type" for="edge" attr.name="connection_type" attr.type="string"/>
+    <key id="strength" for="edge" attr.name="strength" attr.type="double"/>
+    
+    <!-- The main graph definition -->
+    <graph id="social_network" edgedefault="undirected">
+        
+        <!-- Original 5 nodes -->
+        <!-- Node 1: Alice -->
+        <node id="n0">
+            <data key="name">Alice</data>
+            <data key="age">28</data>
+            <data key="profession">Software Engineer</data>
+            <data key="e-mail">alice.johnson@example.com</data>
+            <data key="affiliation">TechCorp Inc.</data>
+        </node>
+        
+        <!-- Node 2: Bob -->
+        <node id="n1">
+            <data key="name">Bob</data>
+            <data key="age">32</data>
+            <data key="profession">Data Scientist</data>
+            <data key="e-mail">bob.smith@example.com</data>
+            <data key="affiliation">DataWorks Analytics</data>
+        </node>
+        
+        <!-- Node 3: Charlie -->
+        <node id="n2">
+            <data key="name">Charlie</data>
+            <data key="age">25</data>
+            <data key="profession">Student</data>
+            <data key="e-mail">charlie.brown@university.edu</data>
+            <data key="affiliation">State University</data>
+        </node>
+        
+        <!-- Node 4: Diana -->
+        <node id="n3">
+            <data key="name">Diana</data>
+            <data key="age">35</data>
+            <data key="profession">Doctor</data>
+            <data key="e-mail">diana.williams@medicalcenter.org</data>
+            <data key="affiliation">City Medical Center</data>
+        </node>
+        
+        <!-- Node 5: Eve -->
+        <node id="n4">
+            <data key="name">Eve</data>
+            <data key="age">29</data>
+            <data key="profession">Designer</data>
+            <data key="e-mail">eve.davis@creative-studio.com</data>
+            <data key="affiliation">Creative Studio Ltd.</data>
+        </node>
+        
+        <!-- NEW NODES: DataWorks Analytics colleagues -->
+        <!-- Node 6: Frank (DataWorks Analytics) -->
+        <node id="n5">
+            <data key="name">Frank</data>
+            <data key="age">31</data>
+            <data key="profession">Machine Learning Engineer</data>
+            <data key="e-mail">frank.chen@dataworks.com</data>
+            <data key="affiliation">DataWorks Analytics</data>
+        </node>
+        
+        <!-- Node 7: Grace (DataWorks Analytics) -->
+        <node id="n6">
+            <data key="name">Grace</data>
+            <data key="age">27</data>
+            <data key="profession">Business Analyst</data>
+            <data key="e-mail">grace.miller@dataworks.com</data>
+            <data key="affiliation">DataWorks Analytics</data>
+        </node>
+        
+        <!-- Original edges connecting 3 nodes (Alice, Bob, and Charlie) -->
+        <!-- Alice ↔ Bob -->
+        <edge id="e0" source="n0" target="n1">
+            <data key="connection_type">Friends</data>
+            <data key="strength">0.8</data>
+        </edge>
+        
+        <!-- Alice ↔ Charlie -->
+        <edge id="e1" source="n0" target="n2">
+            <data key="connection_type">Colleagues</data>
+            <data key="strength">0.6</data>
+        </edge>
+        
+        <!-- Bob ↔ Charlie -->
+        <edge id="e2" source="n1" target="n2">
+            <data key="connection_type">Friends</data>
+            <data key="strength">0.9</data>
+        </edge>
+        
+        <!-- NEW EDGES: Connections involving the new DataWorks Analytics nodes -->
+        <!-- Bob ↔ Frank (colleagues at DataWorks Analytics) -->
+        <edge id="e3" source="n1" target="n5">
+            <data key="connection_type">Colleagues</data>
+            <data key="strength">0.9</data>
+        </edge>
+        
+        <!-- Bob ↔ Grace (colleagues at DataWorks Analytics) -->
+        <edge id="e4" source="n1" target="n6">
+            <data key="connection_type">Colleagues</data>
+            <data key="strength">0.7</data>
+        </edge>
+        
+        <!-- Frank ↔ Grace (colleagues at DataWorks Analytics) -->
+        <edge id="e5" source="n5" target="n6">
+            <data key="connection_type">Colleagues</data>
+            <data key="strength">0.8</data>
+        </edge>
+        
+        <!-- Frank ↔ Alice (met through Bob) -->
+        <edge id="e6" source="n5" target="n0">
+            <data key="connection_type">Acquaintances</data>
+            <data key="strength">0.4</data>
+        </edge>
+        
+        <!-- Grace ↔ Charlie (university connection) -->
+        <edge id="e7" source="n6" target="n2">
+            <data key="connection_type">University Alumni</data>
+            <data key="strength">0.5</data>
+        </edge>
+        
+    </graph>
+</graphml>
