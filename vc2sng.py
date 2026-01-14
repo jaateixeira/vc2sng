@@ -5,9 +5,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from rich import print
 from loguru import logger
-from rich.progress import track
 from networkx import Graph, DiGraph
-from typing import Any
+from rich.progress import Progress
 
 
 def load_graph_with_progress(filepath: str) -> Graph:
@@ -51,15 +50,21 @@ def load_graph_with_progress(filepath: str) -> Graph:
     return graph
 
 
-def compare_node_attributes(graph1, graph2):
+def compare_node_attributes(graph_a: nx.Graph, graph_b:nx.Graph):
+    """
+
+    Args:
+        graph_a (object):
+        graph_b:
+    """
     # Iterate over the nodes in graph1
-    for node1 in graph1.nodes(data=True):
+    for node1 in graph_a.nodes(data=True):
         node_id = node1[0]
         node_attrs1 = node1[1]
 
         # Check if the node exists in graph2
-        if node_id in graph2.nodes:
-            node_attrs2 = graph2.nodes[node_id]
+        if node_id in graph_b.nodes:
+            node_attrs2 = graph_b.nodes[node_id]
 
             # Compare the attributes
             for attr_name, attr_value1 in node_attrs1.items():
@@ -79,9 +84,9 @@ def compare_node_attributes(graph1, graph2):
             print(f"Node {node_id} not found in graph2")
 
 
-def compare_graphs(graph1, graph2):
+def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph):
     # Determine if graphs are directed
-    if isinstance(graph1, DiGraph):
+    if isinstance(graph_a, DiGraph):
         diff_graph = nx.DiGraph()
         deleted_graph = nx.DiGraph()
         added_graph = nx.DiGraph()
@@ -91,38 +96,42 @@ def compare_graphs(graph1, graph2):
         added_graph = nx.Graph()
 
     # Nodes and edges in graph1 but not in graph2 (deleted)
-    deleted_graph.add_nodes_from(set(graph1.nodes()) - set(graph2.nodes()))
-    deleted_edges = set(graph1.edges()) - set(graph2.edges())
+    deleted_graph.add_nodes_from(set(graph_a.nodes()) - set(graph_b.nodes()))
+    deleted_edges = set(graph_a.edges()) - set(graph_b.edges())
     deleted_graph.add_edges_from(deleted_edges)
 
     # Nodes and edges in graph2 but not in graph1 (added)
-    added_graph.add_nodes_from(set(graph2.nodes()) - set(graph1.nodes()))
-    added_edges = set(graph2.edges()) - set(graph1.edges())
+    added_graph.add_nodes_from(set(graph_b.nodes()) - set(graph_a.nodes()))
+    added_edges = set(graph_b.edges()) - set(graph_a.edges())
     added_graph.add_edges_from(added_edges)
 
     # Handle weighted edges
     for edge in deleted_edges:
-        if 'weight' in graph1.edges[edge]:
-            deleted_graph.edges[edge]['weight'] = graph1.edges[edge]['weight']
+        if 'weight' in graph_a.edges[edge]:
+            deleted_graph.edges[edge]['weight'] = graph_a.edges[edge]['weight']
             
     for edge in added_edges:
-        if 'weight' in graph2.edges[edge]:
-            added_graph.edges[edge]['weight'] = graph2.edges[edge]['weight']
+        if 'weight' in graph_b.edges[edge]:
+            added_graph.edges[edge]['weight'] = graph_b.edges[edge]['weight']
 
     # Add edges with different attributes
-    for edge in set(graph1.edges()) & set(graph2.edges()):
-        if graph1.edges[edge] != graph2.edges[edge]:
+    for edge in set(graph_a.edges()) & set(graph_b.edges()):
+        if graph_a.edges[edge] != graph_b.edges[edge]:
             diff_graph.add_edge(*edge, color='yellow')
 
     # Add nodes with different attributes
-    for node in set(graph1.nodes()) & set(graph2.nodes()):
-        if graph1.nodes[node] != graph2.nodes[node]:
+    for node in set(graph_a.nodes()) & set(graph_b.nodes()):
+        if graph_a.nodes[node] != graph_b.nodes[node]:
             diff_graph.add_node(node, color='yellow')
 
     # Visualize the difference graph
     pos = nx.spring_layout(diff_graph)
-    nx.draw_networkx_nodes(diff_graph, pos, node_color=[diff_graph.nodes[n].get('color', 'blue') for n in diff_graph.nodes])
-    nx.draw_networkx_edges(diff_graph, pos, edge_color=[diff_graph.edges[e].get('color', 'black') for e in diff_graph.edges])
+    nx.draw_networkx_nodes(diff_graph,
+                           pos,
+                           node_color=str([diff_graph.nodes[n].get('color', 'blue') for n in diff_graph.nodes]))
+    nx.draw_networkx_edges(diff_graph,
+                           pos,
+                           edge_color=str([diff_graph.edges[e].get('color', 'black') for e in diff_graph.edges]))
     nx.draw_networkx_labels(diff_graph, pos)
     plt.title("Differences Between Graphs")
     plt.show()
@@ -142,10 +151,10 @@ def compare_graphs(graph1, graph2):
     plt.show()
 
     # Log the results
-    logger.info(f"Number of nodes in graph1: {graph1.number_of_nodes()}")
-    logger.info(f"Number of nodes in graph2: {graph2.number_of_nodes()}")
-    logger.info(f"Number of edges in graph1: {graph1.number_of_edges()}")
-    logger.info(f"Number of edges in graph2: {graph2.number_of_edges()}")
+    logger.info(f"Number of nodes in graph1: {graph_a.number_of_nodes()}")
+    logger.info(f"Number of nodes in graph2: {graph_b.number_of_nodes()}")
+    logger.info(f"Number of edges in graph1: {graph_a.number_of_edges()}")
+    logger.info(f"Number of edges in graph2: {graph_b.number_of_edges()}")
     logger.info(f"Number of nodes in difference graph: {diff_graph.number_of_nodes()}")
     logger.info(f"Number of edges in difference graph: {diff_graph.number_of_edges()}")
     logger.info(f"Number of nodes in deleted graph: {deleted_graph.number_of_nodes()}")
@@ -154,10 +163,10 @@ def compare_graphs(graph1, graph2):
     logger.info(f"Number of edges in added graph: {added_graph.number_of_edges()}")
 
     # Print the results using Rich
-    print(f"[bold]Number of nodes in graph1:[/bold] {graph1.number_of_nodes()}")
-    print(f"[bold]Number of nodes in graph2:[/bold] {graph2.number_of_nodes()}")
-    print(f"[bold]Number of edges in graph1:[/bold] {graph1.number_of_edges()}")
-    print(f"[bold]Number of edges in graph2:[/bold] {graph2.number_of_edges()}")
+    print(f"[bold]Number of nodes in graph1:[/bold] {graph_a.number_of_nodes()}")
+    print(f"[bold]Number of nodes in graph2:[/bold] {graph_b.number_of_nodes()}")
+    print(f"[bold]Number of edges in graph1:[/bold] {graph_a.number_of_edges()}")
+    print(f"[bold]Number of edges in graph2:[/bold] {graph_b.number_of_edges()}")
     print(f"[bold]Number of nodes in difference graph:[/bold] {diff_graph.number_of_nodes()}")
     print(f"[bold]Number of edges in difference graph:[/bold] {diff_graph.number_of_edges()}")
     print(f"[bold]Number of nodes in deleted graph:[/bold] {deleted_graph.number_of_nodes()}")
