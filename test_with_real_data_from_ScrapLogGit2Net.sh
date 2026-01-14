@@ -1,5 +1,63 @@
 #!/bin/bash
 
+
+# ============================================
+# Configuration
+# ============================================
+
+# Configuration - parameters for vc2sng
+GRAPH1="test-data/networks-of-individuals/tensorFlowGitLog-2015-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+GRAPH2="test-data/networks-of-individuals/tensorFlowGitLog-2016-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+COLOR_DICT="org-color-dict/firm_color_dict.json"
+AFFILIATION_KEY="affiliation"
+
+
+# Function to validate configuration files
+validate_configuration() {
+    local all_valid=true
+
+    echo "Validating configuration files..."
+    echo "================================"
+
+    # Check GRAPH1
+    if [ -f "$GRAPH1" ]; then
+        echo -e "${GREEN}✓ $GRAPH1 exists${NC}"
+    else
+        echo -e "${RED}✗ $GRAPH1 NOT FOUND${NC}"
+        all_valid=false
+    fi
+
+    # Check GRAPH2
+    if [ -f "$GRAPH2" ]; then
+        echo -e "${GREEN}✓ $GRAPH2 exists${NC}"
+    else
+        echo -e "${RED}✗ $GRAPH2 NOT FOUND${NC}"
+        all_valid=false
+    fi
+
+    # Check COLOR_DICT (optional - warn if missing but don't fail)
+    if [ -f "$COLOR_DICT" ]; then
+        echo -e "${GREEN}✓ $COLOR_DICT exists${NC}"
+    else
+        echo -e "${YELLOW}! $COLOR_DICT not found (optional)${NC}"
+    fi
+
+    echo "================================"
+
+    if [ "$all_valid" = true ]; then
+        echo -e "${GREEN}All required files exist. Validation passed.${NC}"
+        return 0
+    else
+        echo -e "${RED}Validation failed. Missing required files.${NC}"
+        return 1
+    fi
+}
+
+# Run validation
+validate_configuration || exit 1
+
+
+
 # ============================================
 # Color Definitions
 # ============================================
@@ -54,15 +112,6 @@ print_separator() {
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
 }
 
-# ============================================
-# Configuration
-# ============================================
-
-# Configuration - parameters for vc2sng
-GRAPH1="test-data/networks-of-individuals/tensorFlowGitLog-2015-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
-GRAPH2="test-data/networks-of-individuals/tensorFlowGitLog-2016-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
-COLOR_DICT="org-color-dict/firm_color_dict.json"
-AFFILIATION_KEY="affiliation"
 
 # ============================================
 # Main Script

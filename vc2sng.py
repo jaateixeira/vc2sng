@@ -3,11 +3,14 @@
 import argparse
 import networkx as nx
 import matplotlib.pyplot as plt
+import json
 from matplotlib.patches import Patch
+from matplotlib.colors import to_hex
 from rich import print
 from loguru import logger
 from networkx import Graph, DiGraph
 from rich.progress import Progress
+from pathlib import Path
 
 
 def load_graph_with_progress(filepath: str) -> Graph:
@@ -86,37 +89,98 @@ def compare_node_attributes(graph_a: nx.Graph, graph_b: nx.Graph):
             print(f"Node {node_id} not found in graph2")
 
 
-def extract_affiliations(graph: nx.Graph) -> dict:
+def load_color_dict(color_dict_path: str = None) -> dict:
+    """
+    Load color dictionary from JSON file.
+
+    Args:
+        color_dict_path: Path to JSON file with color mappings
+
+    Returns:
+        Dictionary mapping organization names to colors
+    """
+    default_colors = {
+        "google": "red",
+        "nvidia": "limegreen",
+        "intel": "lightblue",
+        "amd": "black",
+        "arm": "steelblue",
+        "amazon": "orange",
+        "ibm": "darkblue",
+        "linaro": "pink",
+        "bytedance": "gray"
+    }
+
+    if color_dict_path:
+        try:
+            with open(color_dict_path, 'r') as f:
+                color_dict = json.load(f)
+                print(f"[green]Loaded color dictionary from {color_dict_path}[/green]")
+                return color_dict
+        except FileNotFoundError:
+            print(
+                f"[yellow]Warning: Color dictionary file '{color_dict_path}' not found. Using default colors.[/yellow]")
+            return default_colors
+        except json.JSONDecodeError:
+            print(
+                f"[yellow]Warning: Invalid JSON in color dictionary file '{color_dict_path}'. Using default colors.[/yellow]")
+            return default_colors
+    else:
+        return default_colors
+
+
+def color_to_hex(color):
+    """Convert color to hex string for Rich output."""
+    if isinstance(color, str):
+        return color
+    elif isinstance(color, tuple) and len(color) == 4:
+        # RGBA tuple - convert to hex (ignoring alpha)
+        return to_hex(color[:3])  # Convert RGB to hex
+    elif isinstance(color, tuple) and len(color) == 3:
+        # RGB tuple
+        return to_hex(color)
+    else:
+        # Return string representation for other types
+        return str(color)
+
+
+def extract_affiliations(graph: nx.Graph, affiliation_key: str = 'affiliation') -> dict:
     """
     Extract unique affiliations from graph nodes.
 
     Args:
         graph: NetworkX graph
+        affiliation_key: Attribute name for affiliation
 
     Returns:
         Dictionary mapping affiliation names to colors
     """
     affiliations = {}
-    color_palette = plt.cm.tab20  # Use a color palette with 20 distinct colors
+    # Use tab20 colormap to generate distinct colors
+    color_palette = plt.cm.tab20
 
     # Collect all unique affiliations
     unique_affiliations = set()
     for node, attrs in graph.nodes(data=True):
-        # Try different possible affiliation attribute names
-        for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+        # Try the specified affiliation key and other common names
+        for attr_name in [affiliation_key, 'd2', 'organization', 'institution', 'affiliation']:
             if attr_name in attrs:
-                unique_affiliations.add(attrs[attr_name])
+                unique_affiliations.add(str(attrs[attr_name]))
                 break
 
-    # Map each affiliation to a color
-    for i, affiliation in enumerate(sorted(unique_affiliations)):
-        color = color_palette(i % 20)  # Cycle through the color palette
+    # Map each affiliation to a color (will be updated later if color dict is provided)
+    affiliations_list = sorted(unique_affiliations)
+    for i, affiliation in enumerate(affiliations_list):
+        # Get color from tab20 colormap (normalized position between 0 and 1)
+        color_position = i / max(len(affiliations_list), 1)
+        color = color_palette(color_position)
         affiliations[affiliation] = color
 
     return affiliations
 
 
-def get_node_color(node_id: str, graph: nx.Graph, affiliations: dict, default_color: str = 'gray') -> str:
+def get_node_color(node_id: str, graph: nx.Graph, affiliations: dict,
+                   color_dict: dict = None, default_color: str = 'gray') -> str:
     """
     Get color for a node based on its affiliation.
 
@@ -124,19 +188,32 @@ def get_node_color(node_id: str, graph: nx.Graph, affiliations: dict, default_co
         node_id: Node identifier
         graph: NetworkX graph
         affiliations: Dictionary mapping affiliations to colors
+        color_dict: Dictionary with predefined organization colors
         default_color: Default color if no affiliation found
 
     Returns:
-        Color string
+        Color string or tuple
     """
     node_attrs = graph.nodes.get(node_id, {})
 
     # Check for affiliation attributes
-    for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+    affiliation_keys = ['affiliation', 'd2', 'organization', 'institution']
+    affiliation_value = None
+
+    for attr_name in affiliation_keys:
         if attr_name in node_attrs:
-            affiliation = node_attrs[attr_name]
-            if affiliation in affiliations:
-                return affiliations[affiliation]
+            affiliation_value = str(node_attrs[attr_name])
+            break
+
+    if affiliation_value:
+        # Check if we have a predefined color for this affiliation
+        if color_dict and affiliation_value in color_dict:
+            return color_dict[affiliation_value]
+
+        # Check if we have a color in the affiliations dict
+        if affiliation_value in affiliations:
+            color = affiliations[affiliation_value]
+            return color
 
     return default_color
 
@@ -405,12 +482,13 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph,
             hex_color = color_to_hex(color)
             print(f"  [color({hex_color})]█[/color({hex_color})] {affiliation}: Graph1={count_a}, Graph2={count_b}")
 
+
 if __name__ == '__main__':
     # Configure Argparse to accept two GraphML files as input
     parser = argparse.ArgumentParser(description='Compare two NetworkX graphs')
     parser.add_argument('graph1', type=str, help='Path to the first GraphML file')
     parser.add_argument('graph2', type=str, help='Path to the second GraphML file')
-    parser.add_argument('--legend', '-l', action='store_true',
+    parser.add_argument('--legend-affiliations', '-la', action='store_true',
                         help='Show legend on the right side of visualizations with affiliations')
     parser.add_argument('--affiliation-key', '-a', type=str, default='affiliation',
                         help='Attribute name for affiliation (default: "affiliation")')
@@ -423,8 +501,14 @@ if __name__ == '__main__':
     logger.info(f"Reading 2nd graphml file {args.graph2}")
     graph2 = nx.read_graphml(args.graph2)
 
+    # Load color dictionary if provided
+    color_dict = load_color_dict(args.color_dict) if args.color_dict else None
+
     # Compare the graphs visually and by differences
-    compare_graphs(graph1, graph2, show_legend=args.legend)
+    compare_graphs(graph1, graph2,
+                   show_affiliation_legend=args.legend_affiliations,
+                   affiliation_key=args.affiliation_key,
+                   color_dict=color_dict)
 
     # Compare node attributes
     compare_node_attributes(graph1, graph2)
