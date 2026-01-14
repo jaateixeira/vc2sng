@@ -6,8 +6,13 @@
 # ============================================
 
 # Configuration - parameters for vc2sng
-GRAPH1="test-data/networks-of-individuals/tensorFlowGitLog-2015-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
-GRAPH2="test-data/networks-of-individuals/tensorFlowGitLog-2016-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+#GRAPH1="test-data/networks-of-individuals/tensorFlowGitLog-2015-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+#GRAPH2="test-data/networks-of-individuals/tensorFlowGitLog-2016-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+
+GRAPH1="test-data/networks-of-individuals/tensorFlowGitLog-2016-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+GRAPH2="test-data/networks-of-individuals/tensorFlowGitLog-2017-git-log-outpuyt-by-Jose.IN.NetworkFile.graphML"
+
+
 COLOR_DICT="org-color-dict/firm_color_dict.json"
 AFFILIATION_KEY="affiliation"
 

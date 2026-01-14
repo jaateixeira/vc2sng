@@ -1,3 +1,6 @@
-As vc2sng is independent from ScrapLog, so it should run witout --color-dict, users can always visualize resulting networks wiht ScrapLogGit2Net scripts
+As how is opinion of LLMs on how it is compared
 The script should down save the diff added and deleted in graphML
+
+As vc2sng is independent from ScrapLog, so it should run witout --color-dict, users can always visualize resulting networks wiht ScrapLogGit2Net scripts
+
 the script should compare both unweighted and weighted graphs 
