@@ -53,10 +53,11 @@ def load_graph_with_progress(filepath: str) -> Graph:
 
 def compare_node_attributes(graph_a: nx.Graph, graph_b: nx.Graph):
     """
+    Compare node attributes between two graphs.
 
     Args:
-        graph_a (object):
-        graph_b:
+        graph_a: First graph
+        graph_b: Second graph
     """
     # Iterate over the nodes in graph1
     for node1 in graph_a.nodes(data=True):
@@ -85,6 +86,61 @@ def compare_node_attributes(graph_a: nx.Graph, graph_b: nx.Graph):
             print(f"Node {node_id} not found in graph2")
 
 
+def extract_affiliations(graph: nx.Graph) -> dict:
+    """
+    Extract unique affiliations from graph nodes.
+
+    Args:
+        graph: NetworkX graph
+
+    Returns:
+        Dictionary mapping affiliation names to colors
+    """
+    affiliations = {}
+    color_palette = plt.cm.tab20  # Use a color palette with 20 distinct colors
+
+    # Collect all unique affiliations
+    unique_affiliations = set()
+    for node, attrs in graph.nodes(data=True):
+        # Try different possible affiliation attribute names
+        for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+            if attr_name in attrs:
+                unique_affiliations.add(attrs[attr_name])
+                break
+
+    # Map each affiliation to a color
+    for i, affiliation in enumerate(sorted(unique_affiliations)):
+        color = color_palette(i % 20)  # Cycle through the color palette
+        affiliations[affiliation] = color
+
+    return affiliations
+
+
+def get_node_color(node_id: str, graph: nx.Graph, affiliations: dict, default_color: str = 'gray') -> str:
+    """
+    Get color for a node based on its affiliation.
+
+    Args:
+        node_id: Node identifier
+        graph: NetworkX graph
+        affiliations: Dictionary mapping affiliations to colors
+        default_color: Default color if no affiliation found
+
+    Returns:
+        Color string
+    """
+    node_attrs = graph.nodes.get(node_id, {})
+
+    # Check for affiliation attributes
+    for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+        if attr_name in node_attrs:
+            affiliation = node_attrs[attr_name]
+            if affiliation in affiliations:
+                return affiliations[affiliation]
+
+    return default_color
+
+
 def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = False):
     # Determine if graphs are directed
     if isinstance(graph_a, DiGraph):
@@ -97,12 +153,14 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = Fal
         added_graph = nx.Graph()
 
     # Nodes and edges in graph1 but not in graph2 (deleted)
-    deleted_graph.add_nodes_from(set(graph_a.nodes()) - set(graph_b.nodes()))
+    deleted_nodes = set(graph_a.nodes()) - set(graph_b.nodes())
+    deleted_graph.add_nodes_from(deleted_nodes)
     deleted_edges = set(graph_a.edges()) - set(graph_b.edges())
     deleted_graph.add_edges_from(deleted_edges)
 
     # Nodes and edges in graph2 but not in graph1 (added)
-    added_graph.add_nodes_from(set(graph_b.nodes()) - set(graph_a.nodes()))
+    added_nodes = set(graph_b.nodes()) - set(graph_a.nodes())
+    added_graph.add_nodes_from(added_nodes)
     added_edges = set(graph_b.edges()) - set(graph_a.edges())
     added_graph.add_edges_from(added_edges)
 
@@ -124,13 +182,34 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = Fal
     for node in set(graph_a.nodes()) & set(graph_b.nodes()):
         if graph_a.nodes[node] != graph_b.nodes[node]:
             diff_graph.add_node(node, color='yellow')
+        else:
+            # Add node with same attributes for context
+            diff_graph.add_node(node)
+
+    # Extract affiliations from combined graph data for legend
+    combined_graph = nx.compose(graph_a, graph_b)
+    affiliations = extract_affiliations(combined_graph)
 
     # Visualize the difference graph
-    fig1, ax1 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
+    fig1, ax1 = plt.subplots(figsize=(14, 8) if show_legend else (10, 8))
     pos = nx.spring_layout(diff_graph)
 
-    # Get colors for nodes and edges
-    node_colors = [diff_graph.nodes[n].get('color', 'blue') for n in diff_graph.nodes()]
+    # Get colors for nodes based on their affiliation
+    node_colors = []
+    for node in diff_graph.nodes():
+        if 'color' in diff_graph.nodes[node] and diff_graph.nodes[node]['color'] == 'yellow':
+            # Nodes with different attributes
+            node_colors.append('yellow')
+        else:
+            # Get color based on affiliation from original graph
+            if node in graph_a.nodes():
+                node_colors.append(get_node_color(node, graph_a, affiliations))
+            elif node in graph_b.nodes():
+                node_colors.append(get_node_color(node, graph_b, affiliations))
+            else:
+                node_colors.append('gray')
+
+    # Get edge colors
     edge_colors = [diff_graph.edges[e].get('color', 'black') for e in diff_graph.edges()]
 
     # Draw the graph
@@ -140,55 +219,100 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = Fal
 
     # Add legend if requested
     if show_legend:
-        legend_elements = [
-            Patch(facecolor='blue', edgecolor='black', label='Same Structure'),
-            Patch(facecolor='yellow', edgecolor='black', label='Different Attributes'),
-        ]
-        ax1.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+        # Create legend elements for affiliations
+        legend_elements = []
 
-    plt.title("Differences Between Graphs")
+        # Add affiliation legend items
+        for affiliation, color in affiliations.items():
+            legend_elements.append(
+                Patch(facecolor=color, edgecolor='black', label=f'{affiliation}')
+            )
+
+        # Add difference legend items
+        if any(c == 'yellow' for c in node_colors) or any(c == 'yellow' for c in edge_colors):
+            legend_elements.append(
+                Patch(facecolor='yellow', edgecolor='black', label='Different Attributes')
+            )
+
+        ax1.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5), fontsize='small')
+
+    plt.title("Differences Between Graphs (Nodes colored by affiliation)")
     plt.tight_layout()
     plt.show()
 
     # Visualize deleted graph
-    fig2, ax2 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
+    fig2, ax2 = plt.subplots(figsize=(14, 8) if show_legend else (10, 8))
     pos_deleted = nx.spring_layout(deleted_graph)
+
+    # Get colors for deleted nodes based on their affiliation
+    deleted_node_colors = [get_node_color(node, graph_a, affiliations, 'red') for node in deleted_nodes]
+
     edge_weights = nx.get_edge_attributes(deleted_graph, 'weight').values()
     edge_widths = list(edge_weights) if edge_weights else [1] * deleted_graph.number_of_edges()
 
-    nx.draw_networkx(deleted_graph, pos_deleted, with_labels=True,
-                     node_color='red', edge_color='red', width=edge_widths, ax=ax2)
+    nx.draw_networkx_nodes(deleted_graph, pos_deleted, node_color=deleted_node_colors, ax=ax2)
+    nx.draw_networkx_edges(deleted_graph, pos_deleted, edge_color='red', width=edge_widths, ax=ax2)
+    nx.draw_networkx_labels(deleted_graph, pos_deleted, ax=ax2)
 
     # Add legend if requested
     if show_legend:
-        legend_elements = [
-            Patch(facecolor='red', edgecolor='black', label='Deleted Nodes'),
-            Patch(facecolor='red', edgecolor='red', label='Deleted Edges'),
-        ]
-        ax2.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+        legend_elements = []
 
-    plt.title("Deleted Nodes/Edges")
+        # Add affiliation legend items for deleted nodes
+        deleted_affiliations = set()
+        for node in deleted_nodes:
+            for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+                if attr_name in graph_a.nodes[node]:
+                    deleted_affiliations.add(graph_a.nodes[node][attr_name])
+                    break
+
+        for affiliation, color in affiliations.items():
+            if affiliation in deleted_affiliations:
+                legend_elements.append(
+                    Patch(facecolor=color, edgecolor='black', label=f'{affiliation} (Deleted)')
+                )
+
+        ax2.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5), fontsize='small')
+
+    plt.title("Deleted Nodes/Edges (Colored by affiliation)")
     plt.tight_layout()
     plt.show()
 
     # Visualize added graph
-    fig3, ax3 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
+    fig3, ax3 = plt.subplots(figsize=(14, 8) if show_legend else (10, 8))
     pos_added = nx.spring_layout(added_graph)
+
+    # Get colors for added nodes based on their affiliation
+    added_node_colors = [get_node_color(node, graph_b, affiliations, 'green') for node in added_nodes]
+
     edge_weights = nx.get_edge_attributes(added_graph, 'weight').values()
     edge_widths = list(edge_weights) if edge_weights else [1] * added_graph.number_of_edges()
 
-    nx.draw_networkx(added_graph, pos_added, with_labels=True,
-                     node_color='green', edge_color='green', width=edge_widths, ax=ax3)
+    nx.draw_networkx_nodes(added_graph, pos_added, node_color=added_node_colors, ax=ax3)
+    nx.draw_networkx_edges(added_graph, pos_added, edge_color='green', width=edge_widths, ax=ax3)
+    nx.draw_networkx_labels(added_graph, pos_added, ax=ax3)
 
     # Add legend if requested
     if show_legend:
-        legend_elements = [
-            Patch(facecolor='green', edgecolor='black', label='Added Nodes'),
-            Patch(facecolor='green', edgecolor='green', label='Added Edges'),
-        ]
-        ax3.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+        legend_elements = []
 
-    plt.title("Added Nodes/Edges")
+        # Add affiliation legend items for added nodes
+        added_affiliations = set()
+        for node in added_nodes:
+            for attr_name in ['affiliation', 'd2', 'organization', 'institution']:
+                if attr_name in graph_b.nodes[node]:
+                    added_affiliations.add(graph_b.nodes[node][attr_name])
+                    break
+
+        for affiliation, color in affiliations.items():
+            if affiliation in added_affiliations:
+                legend_elements.append(
+                    Patch(facecolor=color, edgecolor='black', label=f'{affiliation} (Added)')
+                )
+
+        ax3.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5), fontsize='small')
+
+    plt.title("Added Nodes/Edges (Colored by affiliation)")
     plt.tight_layout()
     plt.show()
 
@@ -216,6 +340,18 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = Fal
     print(f"[bold]Number of nodes in added graph:[/bold] {added_graph.number_of_nodes()}")
     print(f"[bold]Number of edges in added graph:[/bold] {added_graph.number_of_edges()}")
 
+    # Print affiliation summary
+    print("\n[bold cyan]Affiliation Summary:[/bold cyan]")
+    for affiliation, color in affiliations.items():
+        # Count nodes per affiliation in each graph
+        count_a = sum(1 for node in graph_a.nodes()
+                      if any(attr in graph_a.nodes[node] and graph_a.nodes[node][attr] == affiliation
+                             for attr in ['affiliation', 'd2', 'organization', 'institution']))
+        count_b = sum(1 for node in graph_b.nodes()
+                      if any(attr in graph_b.nodes[node] and graph_b.nodes[node][attr] == affiliation
+                             for attr in ['affiliation', 'd2', 'organization', 'institution']))
+        print(f"  {affiliation}: Graph1={count_a}, Graph2={count_b}")
+
 
 if __name__ == '__main__':
     # Configure Argparse to accept two GraphML files as input
@@ -223,7 +359,11 @@ if __name__ == '__main__':
     parser.add_argument('graph1', type=str, help='Path to the first GraphML file')
     parser.add_argument('graph2', type=str, help='Path to the second GraphML file')
     parser.add_argument('--legend', '-l', action='store_true',
-                        help='Show legend on the right side of visualizations')
+                        help='Show legend on the right side of visualizations with affiliations')
+    parser.add_argument('--affiliation-key', '-a', type=str, default='affiliation',
+                        help='Attribute name for affiliation (default: "affiliation")')
+    parser.add_argument('--color-dict', '-c', type=str,
+                        help='Path to JSON file with organization-color mappings')
     args = parser.parse_args()
 
     logger.info(f"Reading 1st graphml file {args.graph1}")
