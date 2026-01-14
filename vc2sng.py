@@ -3,6 +3,7 @@
 import argparse
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from rich import print
 from loguru import logger
 from networkx import Graph, DiGraph
@@ -13,7 +14,7 @@ def load_graph_with_progress(filepath: str) -> Graph:
     """
     Load a GraphML file into a NetworkX graph with a progress bar.
 
-    This function reads a GraphML file, creates a NetworkX graph, and shows the 
+    This function reads a GraphML file, creates a NetworkX graph, and shows the
     loading progress using the `rich` library's progress bar.
 
     Args:
@@ -29,7 +30,7 @@ def load_graph_with_progress(filepath: str) -> Graph:
 
         # Load the graph from the GraphML file
         graph: Graph = nx.read_graphml(filepath)
-        
+
         # Get the number of nodes and edges in the graph
         num_nodes: int = graph.number_of_nodes()
         num_edges: int = graph.number_of_edges()
@@ -50,7 +51,7 @@ def load_graph_with_progress(filepath: str) -> Graph:
     return graph
 
 
-def compare_node_attributes(graph_a: nx.Graph, graph_b:nx.Graph):
+def compare_node_attributes(graph_a: nx.Graph, graph_b: nx.Graph):
     """
 
     Args:
@@ -84,7 +85,7 @@ def compare_node_attributes(graph_a: nx.Graph, graph_b:nx.Graph):
             print(f"Node {node_id} not found in graph2")
 
 
-def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph):
+def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph, show_legend: bool = False):
     # Determine if graphs are directed
     if isinstance(graph_a, DiGraph):
         diff_graph = nx.DiGraph()
@@ -109,7 +110,7 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph):
     for edge in deleted_edges:
         if 'weight' in graph_a.edges[edge]:
             deleted_graph.edges[edge]['weight'] = graph_a.edges[edge]['weight']
-            
+
     for edge in added_edges:
         if 'weight' in graph_b.edges[edge]:
             added_graph.edges[edge]['weight'] = graph_b.edges[edge]['weight']
@@ -125,29 +126,70 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph):
             diff_graph.add_node(node, color='yellow')
 
     # Visualize the difference graph
+    fig1, ax1 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
     pos = nx.spring_layout(diff_graph)
-    nx.draw_networkx_nodes(diff_graph,
-                           pos,
-                           node_color=str([diff_graph.nodes[n].get('color', 'blue') for n in diff_graph.nodes]))
-    nx.draw_networkx_edges(diff_graph,
-                           pos,
-                           edge_color=str([diff_graph.edges[e].get('color', 'black') for e in diff_graph.edges]))
-    nx.draw_networkx_labels(diff_graph, pos)
+
+    # Get colors for nodes and edges
+    node_colors = [diff_graph.nodes[n].get('color', 'blue') for n in diff_graph.nodes()]
+    edge_colors = [diff_graph.edges[e].get('color', 'black') for e in diff_graph.edges()]
+
+    # Draw the graph
+    nx.draw_networkx_nodes(diff_graph, pos, node_color=node_colors, ax=ax1)
+    nx.draw_networkx_edges(diff_graph, pos, edge_color=edge_colors, ax=ax1)
+    nx.draw_networkx_labels(diff_graph, pos, ax=ax1)
+
+    # Add legend if requested
+    if show_legend:
+        legend_elements = [
+            Patch(facecolor='blue', edgecolor='black', label='Same Structure'),
+            Patch(facecolor='yellow', edgecolor='black', label='Different Attributes'),
+        ]
+        ax1.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+
     plt.title("Differences Between Graphs")
+    plt.tight_layout()
     plt.show()
 
     # Visualize deleted graph
+    fig2, ax2 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
     pos_deleted = nx.spring_layout(deleted_graph)
     edge_weights = nx.get_edge_attributes(deleted_graph, 'weight').values()
-    nx.draw_networkx(deleted_graph, pos_deleted, with_labels=True, node_color='red', edge_color='red', width=list(edge_weights) if edge_weights else 1)
+    edge_widths = list(edge_weights) if edge_weights else [1] * deleted_graph.number_of_edges()
+
+    nx.draw_networkx(deleted_graph, pos_deleted, with_labels=True,
+                     node_color='red', edge_color='red', width=edge_widths, ax=ax2)
+
+    # Add legend if requested
+    if show_legend:
+        legend_elements = [
+            Patch(facecolor='red', edgecolor='black', label='Deleted Nodes'),
+            Patch(facecolor='red', edgecolor='red', label='Deleted Edges'),
+        ]
+        ax2.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+
     plt.title("Deleted Nodes/Edges")
+    plt.tight_layout()
     plt.show()
 
     # Visualize added graph
+    fig3, ax3 = plt.subplots(figsize=(12, 8) if show_legend else (8, 8))
     pos_added = nx.spring_layout(added_graph)
     edge_weights = nx.get_edge_attributes(added_graph, 'weight').values()
-    nx.draw_networkx(added_graph, pos_added, with_labels=True, node_color='green', edge_color='green', width=list(edge_weights) if edge_weights else 1)
+    edge_widths = list(edge_weights) if edge_weights else [1] * added_graph.number_of_edges()
+
+    nx.draw_networkx(added_graph, pos_added, with_labels=True,
+                     node_color='green', edge_color='green', width=edge_widths, ax=ax3)
+
+    # Add legend if requested
+    if show_legend:
+        legend_elements = [
+            Patch(facecolor='green', edgecolor='black', label='Added Nodes'),
+            Patch(facecolor='green', edgecolor='green', label='Added Edges'),
+        ]
+        ax3.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1, 0.5))
+
     plt.title("Added Nodes/Edges")
+    plt.tight_layout()
     plt.show()
 
     # Log the results
@@ -174,20 +216,23 @@ def compare_graphs(graph_a: nx.Graph, graph_b: nx.Graph):
     print(f"[bold]Number of nodes in added graph:[/bold] {added_graph.number_of_nodes()}")
     print(f"[bold]Number of edges in added graph:[/bold] {added_graph.number_of_edges()}")
 
+
 if __name__ == '__main__':
     # Configure Argparse to accept two GraphML files as input
     parser = argparse.ArgumentParser(description='Compare two NetworkX graphs')
     parser.add_argument('graph1', type=str, help='Path to the first GraphML file')
     parser.add_argument('graph2', type=str, help='Path to the second GraphML file')
+    parser.add_argument('--legend', '-l', action='store_true',
+                        help='Show legend on the right side of visualizations')
     args = parser.parse_args()
 
-    logger.info("Reading 1st graphml file {args.graph1}")
+    logger.info(f"Reading 1st graphml file {args.graph1}")
     graph1 = nx.read_graphml(args.graph1)
-    logger.info("Reading 2nd graphml file {args.graph2}")
+    logger.info(f"Reading 2nd graphml file {args.graph2}")
     graph2 = nx.read_graphml(args.graph2)
-    
-    # Compare the graphs visually and by differences
-    compare_graphs(graph1, graph2)
 
-    # Compare node attributes 
+    # Compare the graphs visually and by differences
+    compare_graphs(graph1, graph2, show_legend=args.legend)
+
+    # Compare node attributes
     compare_node_attributes(graph1, graph2)
